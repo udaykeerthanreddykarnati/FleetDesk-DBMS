@@ -1,7 +1,9 @@
 import { describe,it,expect } from 'vitest';
 import { driverSchema, incidentSchema, shipmentSchema, tripSchema, vehicleSchema } from '../backend/lib/validation';
 import { hashPassword, verifyPassword } from '../backend/lib/password';
+import { imageMimeFromBytes, MAX_IMAGE_BYTES, safeImageFilename } from '../backend/lib/image-validation';
 import { canTransitionShipment, canTransitionTrip } from '../backend/lib/rules';
+import { mergeVectorMatches } from '../backend/lib/vector-results';
 import { toMysqlUtcDateTime } from '../backend/lib/mysql-date';
 
 describe('fleet data validation',()=>{
@@ -43,5 +45,21 @@ describe('MySQL date persistence',()=>{
     expect(toMysqlUtcDateTime('2026-10-29T17:19:39.910Z')).toBe('2026-10-29 17:19:39');
     expect(toMysqlUtcDateTime('2026-10-29T22:49:39+05:30')).toBe('2026-10-29 17:19:39');
     expect(()=>toMysqlUtcDateTime('not-a-date')).toThrow();
+  });
+});
+
+describe('binary image validation and vector search result handling',()=>{
+  it('detects actual raster image signatures and rejects file-name or MIME spoofing',()=>{
+    const png=Buffer.from([137,80,78,71,13,10,26,10,1,2,3]);
+    expect(imageMimeFromBytes(png)).toBe('image/png');
+    expect(imageMimeFromBytes(Buffer.from('<svg onload=alert(1)>'))).toBe(null);
+    expect(safeImageFilename('../../unsafe name.png')).toBe('unsafe_name.png');
+    expect(MAX_IMAGE_BYTES).toBe(5*1024*1024);
+  });
+  it('returns no matches when pgvector has no rows and never links orphaned vectors',()=>{
+    expect(mergeVectorMatches([],[])).toEqual([]);
+    expect(mergeVectorMatches([{incident_id:999,distance:0.1}],[])).toEqual([]);
+    const results=mergeVectorMatches([{incident_id:'4',distance:0.2}],[{id:4,summary:'Tyre issue',severity:'medium',incident_status:'open',occurred_at:'2026-10-28'}]);
+    expect(results[0].similarity).toBeCloseTo(0.8);
   });
 });

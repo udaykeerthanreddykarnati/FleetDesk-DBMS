@@ -1,7 +1,52 @@
 USE fleet_logistics;
 
-DROP PROCEDURE IF EXISTS sp_assign_trip;
+DROP TRIGGER IF EXISTS trg_shipments_status_before_update;
+DROP TRIGGER IF EXISTS trg_shipments_history_after_insert;
+DROP TRIGGER IF EXISTS trg_shipments_history_after_update;
 DELIMITER $$
+CREATE TRIGGER trg_shipments_status_before_update
+BEFORE UPDATE ON shipments
+FOR EACH ROW
+BEGIN
+  IF OLD.status = 'delivered' AND NEW.status <> 'delivered' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A delivered shipment cannot move back to an earlier status';
+  END IF;
+  IF NEW.status = 'delivered' AND OLD.status <> 'delivered' THEN
+    SET NEW.delivered_at = COALESCE(NEW.delivered_at, CURRENT_TIMESTAMP);
+  END IF;
+END$$
+
+CREATE TRIGGER trg_shipments_history_after_insert
+AFTER INSERT ON shipments
+FOR EACH ROW
+BEGIN
+  INSERT INTO shipment_status_history (shipment_id, old_status, new_status)
+  VALUES (NEW.id, NULL, NEW.status);
+END$$
+
+CREATE TRIGGER trg_shipments_history_after_update
+AFTER UPDATE ON shipments
+FOR EACH ROW
+BEGIN
+  IF OLD.status <> NEW.status THEN
+    INSERT INTO shipment_status_history (shipment_id, old_status, new_status)
+    VALUES (NEW.id, OLD.status, NEW.status);
+  END IF;
+END$$
+
+DROP FUNCTION IF EXISTS fn_vehicle_expense_total$$
+CREATE FUNCTION fn_vehicle_expense_total(p_vehicle_id BIGINT UNSIGNED)
+RETURNS DECIMAL(14,2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+  DECLARE result_total DECIMAL(14,2);
+  SELECT COALESCE(SUM(amount), 0) INTO result_total
+  FROM expenses WHERE vehicle_id = p_vehicle_id;
+  RETURN result_total;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_assign_trip$$
 CREATE PROCEDURE sp_assign_trip(
   IN p_trip_id BIGINT UNSIGNED,
   IN p_vehicle_id BIGINT UNSIGNED,

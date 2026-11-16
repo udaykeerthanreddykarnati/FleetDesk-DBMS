@@ -120,6 +120,10 @@ If setting up on a completely fresh machine:
 - On a later run, start databases with `./backend/scripts/start-local-databases.sh`, then run `npm run dev`. Do not run `setup-local.sh` again unless you intentionally want to reload the schema.
 - Project data lives under `.local-data/`; it is ignored by Git. `.env.local` is ignored as well.
 
+## Entity-Relationship Diagram (Chen Notation)
+
+![FleetDesk Chen Notation ER Diagram](ER%20diagram.png)
+
 ## Application screenshots
 
 ![Vehicles page with MySQL MEDIUMBLOB images](docs/screenshots/website-vehicles.png)
@@ -139,6 +143,8 @@ npm run build            # optimized production bundle (webpack)
 npm start                # serve the built app at localhost:3000
 npm run db:seed          # insert/update fictional demonstration records and 30 BLOB images
 npm run db:sync-vectors  # synchronize pending/failed incident embedding jobs to PostgreSQL pgvector
+npm run db:mysql         # open interactive MySQL shell (port 3307, fleet_logistics)
+npm run db:psql          # open interactive PostgreSQL shell (port 5433, fleet_vectors)
 ```
 
 For integration tests, export credentials for an existing Admin first:

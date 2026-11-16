@@ -14,8 +14,6 @@ MYSQL_DATABASE=fleet_logistics
 PG_VECTOR_PASSWORD=${PG_VECTOR_PASSWORD}
 PG_VECTOR_URL=postgresql://fleet_app:${PG_VECTOR_PASSWORD}@127.0.0.1:5433/fleet_vectors
 SESSION_SECRET=${SESSION_SECRET}
-OLLAMA_BASE_URL=http://127.0.0.1:11434
-EMBEDDING_MODEL=nomic-embed-text
 ENV
   chmod 600 .env.local
 fi

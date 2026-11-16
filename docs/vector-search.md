@@ -13,7 +13,7 @@
 
 1. A new or edited incident and an `incident_vector_jobs` **upsert** snapshot are committed together in one MySQL transaction.
 2. The sync worker claims a job using a MySQL transaction and `FOR UPDATE SKIP LOCKED`, increments its attempt counter, and marks it processing.
-3. For an upsert, the worker combines summary and description, asks Ollama for the 768-value embedding, and upserts metadata/vector in PostgreSQL.
+3. For an upsert, the worker combines summary and description, computes the 768-value normalized embedding in-process via `embed()` in `backend/lib/vector.ts`, and upserts metadata/vector in PostgreSQL.
 4. On success it marks the MySQL job done and the current incident `embedding_status='synced'`. On failure it saves a bounded error and sets the incident status to `failed`.
 5. A search embeds the user query, asks pgvector for the nearest rows ordered by `embedding <=> $query`, and loads current incident status from MySQL by those IDs. Orphan vector rows are not displayed.
 6. On incident deletion, a MySQL delete job is enqueued before the source row is deleted. Because the outbox is not FK-cascaded, the worker can still remove the PostgreSQL row.
@@ -43,7 +43,7 @@ The full local workflow was exercised by the integration test: creating a test i
 ## Retry and diagnostics
 
 ```sh
-# With Ollama running and nomic-embed-text pulled:
+# Ensure PostgreSQL (port 5433) and MySQL (port 3307) are running, then sync:
 npm run db:sync-vectors
 
 # Inspect pending and failed MySQL jobs:
@@ -56,4 +56,4 @@ psql --host=127.0.0.1 --port=5433 --username=postgres \
   --dbname=fleet_vectors --command="SELECT incident_id, severity, updated_at FROM incident_vectors ORDER BY updated_at DESC"
 ```
 
-Typical causes are a stopped Ollama process, a missing model, a PostgreSQL connection mismatch, or incompatible embedding dimensions. Fix the local service/configuration, then rerun the sync. The source incident stays in MySQL regardless of vector availability.
+Typical causes of sync failures are a stopped PostgreSQL process, a missing `vector` extension, connection credential mismatches in `.env.local`, or incompatible embedding dimensions. Fix the local PostgreSQL service/configuration, then rerun the sync. The source incident stays in MySQL regardless of vector availability.

@@ -51,6 +51,8 @@ All database credentials and connection pools are used in server-only modules un
 
 ## Entity relationship model
 
+![FleetDesk Chen Notation ER Diagram](../ER%20diagram.png)
+
 ```mermaid
 erDiagram
   USERS ||--o{ APP_SESSIONS : owns
@@ -164,8 +166,8 @@ MySQL is used because the required operational model is highly relational and th
 ## Conclusion and future enhancements
 
 FleetDesk fulfills all relational and vector database requirements of the DBMS Level 3 rubric:
-- Normalized 3NF/BCNF MySQL schema across 14 tables and 2 analytical views (`backend/sql/mysql/001_schema.sql`), plus triggers, stored function, and transactional stored procedure (`backend/sql/mysql/002_programmability.sql`).
-- PostgreSQL + `pgvector` vector table (`backend/sql/postgres/001_vector_schema.sql`) with HNSW cosine indexing (`vector_cosine_ops`) and durable outbox synchronization (`backend/lib/vector.ts`).
+- Normalized 3NF/BCNF MySQL schema across 15 base tables and 2 analytical views (`backend/sql/mysql/001_schema.sql`), plus triggers, stored function, and transactional stored procedure (`backend/sql/mysql/002_programmability.sql`).
+- PostgreSQL + `pgvector` vector table (`backend/sql/postgres/001_vector_schema.sql`, making 16 base tables total across both databases) with HNSW cosine indexing (`vector_cosine_ops`) and durable outbox synchronization (`backend/lib/vector.ts`).
 - Full Next.js App Router frontend (`frontend/components/`) and API backend (`app/api/`, `backend/lib/`) with scrypt authentication and two-role RBAC (`admin` and `operations`).
 
 **Future enhancements:**

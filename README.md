@@ -12,7 +12,7 @@ A local DBMS Level 3 experiential learning project managing vehicles, drivers, s
 | Teammate | SRN | Ownership (Database + Full-Stack Application) |
 | :--- | :--- | :--- |
 | **Karnati Uday Keerthan Reddy** | `PES1UG24CS217` | **MySQL Relational Core & Dispatch:** Core schema (`users`, `app_sessions`, `drivers`, `vehicles`, `trips`, `v_fleet_dashboard`), transactional Stored Procedure `sp_assign_trip` (`FOR UPDATE` row locks), salted `scrypt` authentication & 2-role RBAC (`admin` / `operations`), Next.js App Router shell, Dashboard, Fleet/Driver/Trip/User APIs & pages, unit tests, and architecture documentation. |
-| **Kruthiknandan R** | `PES12024CS239` | **PostgreSQL `pgvector`, Analytics & Media BLOBs:** `pgvector` HNSW cosine schema (`VECTOR(768)`), logistics & `MEDIUMBLOB` tables (`shipments`, `expenses`, `maintenance_records`, `incidents`, `*_images`, `v_monthly_expense_totals`), 3 shipment audit triggers & `fn_vehicle_expense_total`, in-process 768-dim embedding engine (`vector.ts`), `FULLTEXT` search, `WITH RECURSIVE` CTE & `RANK() OVER` window reports, dataset seeding (30 photos), and API integration tests. |
+| **Kruthiknandan R** | `PES1UG24CS239` | **PostgreSQL `pgvector`, Analytics & Media BLOBs:** `pgvector` HNSW cosine schema (`VECTOR(768)`), logistics & `MEDIUMBLOB` tables (`shipments`, `expenses`, `maintenance_records`, `incidents`, `*_images`, `v_monthly_expense_totals`), 3 shipment audit triggers & `fn_vehicle_expense_total`, in-process 768-dim embedding engine (`vector.ts`), `FULLTEXT` search, `WITH RECURSIVE` CTE & `RANK() OVER` window reports, dataset seeding (30 photos), and API integration tests. |
 
 ---
 
